@@ -75,7 +75,7 @@ pub struct AmDatEntry {
     pub variant: u8,
     pub set_id: u16,
     pub set_type: u8,
-    pub slot: u8,
+    pub slot: Slot,
     pub defense: u16,
 
     pub model_id_1: u16,
@@ -109,7 +109,7 @@ pub struct AmDatEntry {
     pub skill_3_id: u16,
     pub skill_3_level: u8,
 
-    pub gender: u32,
+    pub gender: Gender,
     pub set_group: u16,
 
     pub gmd_name_index: u16,
@@ -117,4 +117,26 @@ pub struct AmDatEntry {
 
     #[br(map = |x: u8| x > 0)]
     pub is_permanent: bool,
+}
+
+#[binread]
+#[br(little, repr = u32)]
+#[derive(Debug, Serialize)]
+pub enum Gender {
+    INVALID = 0,
+    MALE,
+    FEMALE,
+    UNISEX,
+}
+
+#[binread]
+#[br(little, repr = u8)]
+#[derive(Debug, Serialize)]
+pub enum Slot {
+    HEAD = 0,
+    CHEST,
+    ARMS,
+    WAIST,
+    LEGS,
+    CHARM,
 }
