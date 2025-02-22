@@ -1,0 +1,12 @@
+# Rust
+debug/
+target/
+**/*.rs.bk
+*.pdb
+
+# IDE
+.idea/
+.vscode/
+
+# Project
+dump/

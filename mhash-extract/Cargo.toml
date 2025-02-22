@@ -1,0 +1,9 @@
+[package]
+name = "mhash-extract"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+binrw = "0.14.1"
+serde = { version = "1.0.218", features = ["derive", "default"] }
+serde_json = { version = "1.0.139", features = ["default"] }
