@@ -23,8 +23,8 @@ pub struct Itm {
 #[derive(Debug, Serialize)]
 pub struct ItmEntry {
     pub item_id: u32,
-    pub sub_type: u8,
-    pub r#type: u32,
+    pub sub_type: ItemSubType,
+    pub r#type: ItemType,
 
     pub rarity: u8,
     pub carry_limit: u8,
@@ -38,4 +38,24 @@ pub struct ItmEntry {
 
     pub sell_price: u32,
     pub buy_price: u32,
+}
+#[binread]
+#[br(little, repr = u32)]
+#[derive(Debug, Serialize)]
+pub enum ItemType {
+    Item = 0,
+    Material,
+    AccountItem,
+    Ranged,
+    Decoration,
+    RoomDecoration,
+}
+
+#[binread]
+#[br(little, repr = u8)]
+#[derive(Debug, Serialize)]
+pub enum ItemSubType {
+    None = 0,
+    Ammunition = 1,
+    Coating = 4,
 }
