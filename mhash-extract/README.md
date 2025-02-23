@@ -10,3 +10,5 @@ Tool for extracting Monster Hunter game data into JSON.
 - https://github.com/AsteriskAmpersand/MHW-Save-Editor
 - https://github.com/Fusion86/Cirilla
 - https://github.com/Silvris/MH-Tools-and-Scripts
+- https://github.com/fre-sch/mhw_armor_edit
+- https://github.com/Synthlight/MHW-Editor

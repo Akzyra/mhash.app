@@ -1,8 +1,17 @@
 #![allow(dead_code)]
 
+use binrw::file_ptr::parse_from_iter;
 use binrw::{NullString, binread};
 use serde::Serialize;
 use std::fmt::Debug;
+use std::io::SeekFrom;
+
+pub fn clean_string(s: &str) -> String {
+    s.replace("<ICON ALPHA>", " α")
+        .replace("<ICON BETA>", " β")
+        .replace("<ICON GAMMA>", " γ")
+        .replace("\r\n", "\n")
+}
 
 #[binread]
 #[br(little, repr = u32)]
@@ -24,7 +33,14 @@ pub enum Language {
 }
 
 #[binread]
-#[br(little, magic = b"GMD\0\x02\x03\x01\0")]
+#[br(
+    little,
+    magic = b"GMD\0\x02\x03\x01\0",
+    assert(key_count == string_count),
+    assert(name.len() == name_length as usize),
+    assert(keys.len() == key_count as usize),
+    assert(strings.len() == string_count as usize),
+)]
 #[derive(Debug, Serialize)]
 pub struct Gmd {
     pub language: Language,
@@ -38,25 +54,28 @@ pub struct Gmd {
 
     #[br(temp)]
     name_length: u32,
-    #[br(
-        map = |x: NullString| String::from_utf8_lossy(&x.0).into_owned(),
-        assert (name.len() == name_length as usize),
-    )]
+
+    // TODO: nicer string convert
+    #[br(map = |x: NullString| String::from_utf8_lossy(&x.0).into_owned())]
     pub name: String,
 
     #[br(count = key_count)]
     pub info_entries: Vec<GmdInfoEntry>,
 
     #[br(count = 0x100)]
-    pub unk_block: Vec<u64>,
+    pub unk_block: Vec<i64>,
 
+    // TODO: nicer string convert
     #[br(
-        count = key_count,
+        parse_with = parse_from_iter(info_entries.iter().map(|x| x.key_offset)),
         map = |x: Vec<NullString>| x.iter().map(|y| String::from_utf8_lossy(&y).into_owned()).collect::<Vec<String>>().to_owned(),
+        restore_position,
     )]
     pub keys: Vec<String>,
 
+    // TODO: nicer string convert
     #[br(
+        seek_before(SeekFrom::Current(key_block_size.into())),
         count = string_count,
         map = |x: Vec<NullString>| x.iter().map(|y| String::from_utf8_lossy(&y).into_owned()).collect::<Vec<String>>().to_owned(),
     )]
