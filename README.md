@@ -7,7 +7,7 @@ But I wanted a project to tinker around stuff and this was my best idea.
 
 ➡️ Do not have any expectations of a finished app in the near future.
 
-## mhash-extract
+## [mhash-extract](mhash-extract)
 
 For now just working on the data extraction part and normalizing it.
 

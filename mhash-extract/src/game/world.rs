@@ -1,8 +1,81 @@
 #![allow(dead_code)]
 
-use binrw::binread;
+use binrw::{NullString, binread};
 use serde::Serialize;
 use std::fmt::Debug;
+
+#[binread]
+#[br(little, repr = u32)]
+#[derive(Debug, Serialize)]
+pub enum Language {
+    Japanese = 0,
+    English = 1,
+    French = 2,
+    Spanish = 3,
+    German = 4,
+    Italian = 5,
+    Korean = 6,
+    ChineseTrad = 7,
+    ChineseSimple = 8,
+    Russian = 10,
+    Polish = 11,
+    Brazilian = 21,
+    Arabic = 22,
+}
+
+#[binread]
+#[br(little, magic = b"GMD\0\x02\x03\x01\0")]
+#[derive(Debug, Serialize)]
+pub struct Gmd {
+    pub language: Language,
+    pub zero1: u32,
+    pub zero2: u32,
+
+    pub key_count: u32,
+    pub string_count: u32,
+    pub key_block_size: u32,
+    pub string_block_size: u32,
+
+    #[br(temp)]
+    name_length: u32,
+    #[br(
+        map = |x: NullString| String::from_utf8_lossy(&x.0).into_owned(),
+        assert (name.len() == name_length as usize),
+    )]
+    pub name: String,
+
+    #[br(count = key_count)]
+    pub info_entries: Vec<GmdInfoEntry>,
+
+    #[br(count = 0x100)]
+    pub unk_block: Vec<u64>,
+
+    #[br(
+        count = key_count,
+        map = |x: Vec<NullString>| x.iter().map(|y| String::from_utf8_lossy(&y).into_owned()).collect::<Vec<String>>().to_owned(),
+    )]
+    pub keys: Vec<String>,
+
+    #[br(
+        count = string_count,
+        map = |x: Vec<NullString>| x.iter().map(|y| String::from_utf8_lossy(&y).into_owned()).collect::<Vec<String>>().to_owned(),
+    )]
+    pub strings: Vec<String>,
+}
+
+#[binread]
+#[br(little)]
+#[derive(Debug, Serialize)]
+pub struct GmdInfoEntry {
+    pub index: u32,
+    pub hash1: u32,
+    pub hash2: u32,
+
+    pub filler: u32, // CDCDCDCD
+
+    pub key_offset: u64,
+    pub list_link: u64,
+}
 
 #[binread]
 #[br(little, magic = b"\x01\x10\x09\x18\xbc\x00")]
@@ -123,20 +196,20 @@ pub struct AmDatEntry {
 #[br(little, repr = u32)]
 #[derive(Debug, Serialize)]
 pub enum Gender {
-    INVALID = 0,
-    MALE,
-    FEMALE,
-    UNISEX,
+    Invalid = 0,
+    Male,
+    Female,
+    Unisex,
 }
 
 #[binread]
 #[br(little, repr = u8)]
 #[derive(Debug, Serialize)]
 pub enum Slot {
-    HEAD = 0,
-    CHEST,
-    ARMS,
-    WAIST,
-    LEGS,
-    CHARM,
+    Head = 0,
+    Chest,
+    Arms,
+    Waist,
+    Legs,
+    Charm,
 }

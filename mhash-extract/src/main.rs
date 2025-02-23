@@ -1,4 +1,4 @@
-use crate::game::world::{AmDat, SklDat, SklPtDat};
+use crate::game::world::{AmDat, Gmd, SklDat, SklPtDat};
 use binrw::BinRead;
 use binrw::io::BufReader;
 use std::fs;
@@ -12,11 +12,14 @@ fn main() {
     let skill_file_path = "common/equip/skill_data.skl_dat";
     let skill_point_file_path = "common/equip/skill_point_data.skl_pt_dat";
     let armor_file_path = "common/equip/armor.am_dat";
+    let armor_eng_path = "common/text/steam/armor_eng.gmd";
 
     let skill_file = File::open(Path::new(unpacked).join(skill_file_path)).expect("File not found");
     let skill_point_file =
         File::open(Path::new(unpacked).join(skill_point_file_path)).expect("File not found");
     let armor_file = File::open(Path::new(unpacked).join(armor_file_path)).expect("File not found");
+    let armor_eng_file =
+        File::open(Path::new(unpacked).join(armor_eng_path)).expect("File not found");
 
     let mut r;
 
@@ -46,4 +49,13 @@ fn main() {
     )
     .expect("write error");
     println!("armor_data: {}", armor_data.entries.len());
+
+    r = BufReader::new(armor_eng_file);
+    let armor_eng = Gmd::read(&mut r).expect("read error");
+    fs::write(
+        "./dump/armor_eng.json",
+        serde_json::to_string_pretty(&armor_eng).unwrap(),
+    )
+    .expect("write error");
+    println!("armor_eng: {}", armor_eng.string_count);
 }
