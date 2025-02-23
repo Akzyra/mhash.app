@@ -1,4 +1,4 @@
-use crate::game::world::{AmDat, Gmd, SklDat, SklPtDat};
+use crate::game::world::{AmDat, Gmd, Itm, SklDat, SklPtDat};
 use binrw::BinRead;
 use binrw::io::BufReader;
 use std::fs;
@@ -8,22 +8,37 @@ use std::path::Path;
 mod game;
 
 fn main() {
-    let unpacked = r"H:\MH_WORLD\chunk_combined\";
+    let unpacked = Path::new(r"H:\MH_WORLD\chunk_combined");
+    let item_file_path = "common/item/itemData.itm";
+    let item_eng_path = "common/text/steam/item_eng.gmd";
+
     let skill_file_path = "common/equip/skill_data.skl_dat";
     let skill_point_file_path = "common/equip/skill_point_data.skl_pt_dat";
+
     let armor_file_path = "common/equip/armor.am_dat";
     let armor_eng_path = "common/text/steam/armor_eng.gmd";
 
-    let skill_file = File::open(Path::new(unpacked).join(skill_file_path)).expect("File not found");
-    let skill_point_file =
-        File::open(Path::new(unpacked).join(skill_point_file_path)).expect("File not found");
-    let armor_file = File::open(Path::new(unpacked).join(armor_file_path)).expect("File not found");
-    let armor_eng_file =
-        File::open(Path::new(unpacked).join(armor_eng_path)).expect("File not found");
-
     let mut r;
 
-    r = BufReader::new(skill_point_file);
+    r = BufReader::new(File::open(unpacked.join(item_file_path)).unwrap());
+    let item_data = Itm::read(&mut r).expect("read error");
+    fs::write(
+        "./dump/item_data.json",
+        serde_json::to_string_pretty(&item_data).unwrap(),
+    )
+    .expect("write error");
+    println!("item_data: {}", item_data.entries.len());
+
+    r = BufReader::new(File::open(unpacked.join(item_eng_path)).unwrap());
+    let item_eng = Gmd::read(&mut r).expect("read error");
+    fs::write(
+        "./dump/item_eng.json",
+        serde_json::to_string_pretty(&item_eng).unwrap(),
+    )
+    .expect("write error");
+    println!("item_eng: {}", item_eng.string_count);
+
+    r = BufReader::new(File::open(unpacked.join(skill_point_file_path)).unwrap());
     let skill_point_data = SklPtDat::read(&mut r).expect("read error");
     fs::write(
         "./dump/skill_point_data.json",
@@ -32,7 +47,7 @@ fn main() {
     .expect("write error");
     println!("skill_point_data: {}", skill_point_data.entries.len());
 
-    r = BufReader::new(skill_file);
+    r = BufReader::new(File::open(unpacked.join(skill_file_path)).unwrap());
     let skill_data = SklDat::read(&mut r).expect("read error");
     fs::write(
         "./dump/skill_data.json",
@@ -41,7 +56,7 @@ fn main() {
     .expect("write error");
     println!("skill_data: {}", skill_data.entries.len());
 
-    r = BufReader::new(armor_file);
+    r = BufReader::new(File::open(unpacked.join(armor_file_path)).unwrap());
     let armor_data = AmDat::read(&mut r).expect("read error");
     fs::write(
         "./dump/armor_data.json",
@@ -50,7 +65,7 @@ fn main() {
     .expect("write error");
     println!("armor_data: {}", armor_data.entries.len());
 
-    r = BufReader::new(armor_eng_file);
+    r = BufReader::new(File::open(unpacked.join(armor_eng_path)).unwrap());
     let armor_eng = Gmd::read(&mut r).expect("read error");
     fs::write(
         "./dump/armor_eng.json",
