@@ -21,6 +21,12 @@ fn null_uf8() -> BinResult<String> {
     Ok(s)
 }
 
+#[binrw::parser(reader, endian)]
+fn bool_u8() -> BinResult<bool> {
+    let val = u8::read_options(reader, endian, ())?;
+    Ok(val > 0)
+}
+
 #[binread]
 #[br(little, repr = u32)]
 #[derive(Debug, Serialize)]
@@ -148,7 +154,7 @@ pub struct SklPtDat {
 #[br(little)]
 #[derive(Debug, Serialize)]
 pub struct SklPtDatEntry {
-    #[br(map = |x: u8| x > 0)]
+    #[br(parse_with = bool_u8)]
     pub is_set_skill: bool,
     pub icon_color_id: u8,
 }
@@ -213,7 +219,7 @@ pub struct AmDatEntry {
     pub gmd_name_index: u16,
     pub gmd_desc_index: u16,
 
-    #[br(map = |x: u8| x > 0)]
+    #[br(parse_with = bool_u8)]
     pub is_permanent: bool,
 }
 
