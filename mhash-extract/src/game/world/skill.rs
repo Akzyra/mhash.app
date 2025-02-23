@@ -20,7 +20,7 @@ pub struct SklDat {
 #[br(little)]
 #[derive(Debug, Serialize)]
 pub struct SklDatEntry {
-    pub skl_pt_id: u16,
+    pub skill_point_id: u16,
     pub skill_level: u8,
 
     pub unlock_skill_1_id: u32,
