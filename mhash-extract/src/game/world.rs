@@ -1,7 +1,8 @@
 #![allow(dead_code)]
 
-use binrw::file_ptr::parse_from_iter;
-use binrw::{NullString, binread};
+use binrw::file_ptr::parse_from_iter_with;
+use binrw::helpers::count_with;
+use binrw::{BinRead, BinResult, NullString, binread};
 use serde::Serialize;
 use std::fmt::Debug;
 use std::io::SeekFrom;
@@ -11,6 +12,13 @@ pub fn clean_string(s: &str) -> String {
         .replace("<ICON BETA>", " β")
         .replace("<ICON GAMMA>", " γ")
         .replace("\r\n", "\n")
+}
+
+#[binrw::parser(reader, endian)]
+fn null_uf8() -> BinResult<String> {
+    let ns = NullString::read_options(reader, endian, ())?;
+    let s = String::from_utf8_lossy(ns.as_slice()).into();
+    Ok(s)
 }
 
 #[binread]
@@ -55,8 +63,7 @@ pub struct Gmd {
     #[br(temp)]
     name_length: u32,
 
-    // TODO: nicer string convert
-    #[br(map = |x: NullString| String::from_utf8_lossy(&x.0).into_owned())]
+    #[br(parse_with = null_uf8)]
     pub name: String,
 
     #[br(count = key_count)]
@@ -65,19 +72,18 @@ pub struct Gmd {
     #[br(count = 0x100)]
     pub unk_block: Vec<i64>,
 
-    // TODO: nicer string convert
     #[br(
-        parse_with = parse_from_iter(info_entries.iter().map(|x| x.key_offset)),
-        map = |x: Vec<NullString>| x.iter().map(|y| String::from_utf8_lossy(&y).into_owned()).collect::<Vec<String>>().to_owned(),
+        parse_with = parse_from_iter_with(
+            info_entries.iter().map(|x| x.key_offset),
+            null_uf8,
+        ),
         restore_position,
     )]
     pub keys: Vec<String>,
 
-    // TODO: nicer string convert
     #[br(
         seek_before(SeekFrom::Current(key_block_size.into())),
-        count = string_count,
-        map = |x: Vec<NullString>| x.iter().map(|y| String::from_utf8_lossy(&y).into_owned()).collect::<Vec<String>>().to_owned(),
+        parse_with = count_with(string_count as usize, null_uf8),
     )]
     pub strings: Vec<String>,
 }
