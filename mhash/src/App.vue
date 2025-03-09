@@ -1,19 +1,27 @@
 <script setup lang="ts">
-import HelloWorld from './components/HelloWorld.vue'
-import TheWelcome from './components/TheWelcome.vue'
+import Equip from '@/components/Equip.vue'
+import { EquipSlot } from '@/data/equip.ts'
+import WeaponSharpness from '@/components/WeaponSharpness.vue'
 </script>
 
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />
-
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-    </div>
-  </header>
-
   <main>
-    <TheWelcome />
+    <WeaponSharpness id="s1" :amounts="[100, 50, 50]"></WeaponSharpness>
+    <WeaponSharpness id="s2" :amounts="[120, 30, 30, 60, 50, 60]"></WeaponSharpness>
+
+    <div class="equips">
+      <!-- TODO: Weapon component -->
+      <Equip eslot="Primary" :decos="[1, 1, 1]"></Equip>
+      <Equip eslot="Secondary" :decos="[1, 1]"></Equip>
+
+      <Equip :eslot="EquipSlot.HEAD" :decos="[1]"></Equip>
+      <Equip :eslot="EquipSlot.CHEST" :decos="[2]"></Equip>
+      <Equip :eslot="EquipSlot.ARMS" :decos="[3]"></Equip>
+      <Equip :eslot="EquipSlot.WAIST" :decos="[2, 1]"></Equip>
+      <Equip :eslot="EquipSlot.LEGS" :decos="[3, 2]"></Equip>
+      <Equip :eslot="EquipSlot.CHARM" :decos="[3, 2, 1]"></Equip>
+      TODO: Mantle 1 TODO: Mantle 2
+    </div>
   </main>
 </template>
 
@@ -22,26 +30,12 @@ header {
   line-height: 1.5;
 }
 
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
+.equips {
+  display: flex;
+  flex-direction: column;
 }
 
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
+.equips > *:not(:last-child) {
+  border-bottom: 1px solid var(--color-separator);
 }
 </style>
